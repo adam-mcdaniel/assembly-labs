@@ -14,8 +14,8 @@ PUBLIC _start   ; make procedure _start public
 ; *                     Data Segment                                 
 ; ***********************************************************************
 .DATA
-	x DWORD 2 ; x = 2
-	y DWORD 16 ; y = 3
+	x DWORD -5
+	y DWORD 3
 
 ; ***********************************************************************
 ; *                     Stack Segment                                 
@@ -34,27 +34,30 @@ power PROC NEAR32 ; begin power
         mov ebx, [ebp+12] ; ebx = 1st parameter
         mov ecx, [ebp+8]  ; ecx = 2nd parameter
 
-        cmp ecx, 0
+        ; CALCULATE x^y
+        cmp ecx, 0 ; if y is 0, then dont execute loop (eax is 1)
         je endloop
-        beginloop:
-            imul eax, ebx
-            sub ecx, 1
-            cmp ecx, 0
+        beginloop: ; if y is not zero, perform x^y
+            imul eax, ebx ; multiply accumulator by x
+            dec ecx       ; decrement counter
+            cmp ecx, 0    ; if counter is zero, stop
             jg beginloop
-        endloop:
+        endloop: ; end of loop body
 
         popfd             ; pop flags
         pop ebp           ; restore calling stack frame
         ret	   ; pops address off stack into EIP
 power ENDP ; end power
 
-_start  PROC    NEAR32    ; start procedure called _start. Use flat, 32-bit address memory model
+_start  PROC    NEAR32
         push x
         push y
-        call power
+        call power ; power(x, y)
 
-exit:   EVEN              ; Make rest of code aligned on an even-addressed byte
-        INVOKE  ExitProcess, 0  ; like return( 0 ); in C
-
-_start  ENDP               ; end procedure _start
+; ***********************************************************************
+; *                     Magic Segment                                  
+; ***********************************************************************
+exit:   EVEN
+        INVOKE  ExitProcess, 0
+_start  ENDP
         END
